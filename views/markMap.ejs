@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        form {
+            width: 40%;
+            box-shadow: 0 0 20px 5px gray;
+            margin: 0 auto;
+            padding: 2em;
+            margin-top: 5em;
+        }
+        form > input {
+            font: 300 1em 'Helvetica Neue';
+            padding: 0.25em 0.75em;
+            width: 70%;
+            display: block;
+            margin: 0.5em auto;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script>
+        window.addEventListener('load', function () {
+            navigator.geolocation.getCurrentPosition(function (data) {
+                var geocoder = new google.maps.Geocoder(); // creating a geocoder object
+                var latlng = new google.maps.LatLng(data.coords.latitude, data.coords.longitude);
+                console.log(latlng);
+                geocoder.geocode( {
+                    latLng: latlng
+                }, function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK ) {
+                        console.log(results);
+                        var hashmap = {};
+                        results[0]['address_components'].forEach(function (addressComponent) {
+                            addressComponent.types.forEach(function (type) {
+                                hashmap[type] = addressComponent.long_name;
+                            });
+                        });
+                        console.log(hashmap);
+                        /*var inputs = document.forms.address.getElementsByTagName('input');
+                         for (var i = 0, len = inputs.length; i < len; i++) {
+                         inputs[i].value = hashmap[inputs[i].getAttribute('name')];
+                         }*/
+                        var form = document.forms.address;
+                        for (var prop in hashmap) {
+                            if ( typeof form[prop] !== 'undefined' ) {
+                                form[prop].value = hashmap[prop];
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+<form name="address">
+    <input type="text" placeholder="Apt / Suite #" name="street_number"/>
+    <input type="text" placeholder="Street" name="route"/>
+    <input type="text" placeholder="City" name="locality"/>
+    <input type="text" placeholder="State" name="administrative_area_level_1"/>
+    <input type="text" placeholder="Zip" name="postal_code"/>
+</form>
+
+</body>
+</html>
