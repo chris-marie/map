@@ -94,6 +94,7 @@
             var keyword = 'universities';
             var locationIn = document.querySelector('#locationsIn').value;
             var resPanel = document.querySelector('#results');
+            var nextCenter;
 
             var xhr = new XMLHttpRequest();
             xhr.open('GET', '/map/mapinput/' + locationIn);
@@ -111,6 +112,7 @@
                         d.innerHTML = obj[i].name + '</br>' + obj[i].city + ',  ' + obj[i].state + '</br>' + obj[i].lat + ',  ' +obj[i].lng + '</br> </br>';
                         resPanel.appendChild(d);
                         var pos = new google.maps.LatLng(obj[i].lat,obj[i].lng);
+                        nextCenter = pos;
 
                         var marker = new google.maps.Marker({
                             map: map,
@@ -119,6 +121,9 @@
                         });
 
                     }
+                    map.setCenter(nextCenter);
+                    map.setZoom(12);
+
                 }
             });
             xhr.send();
