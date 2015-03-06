@@ -3,22 +3,39 @@
 <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <title>Geocoding service</title>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/stylesheets/base.css"/>
     <style>
         html, body, #map-canvas {
             height: 100%;
             margin: 0px;
             padding: 0px
         }
-        #panel {
+        #search-panel {
             position: absolute;
             top: 5px;
-            left: 50%;
+            left: calc(50% - 130px);
             margin-left: -180px;
             z-index: 5;
             background-color: #fff;
-            padding: 5px;
+            padding: 10px;
             border: 1px solid #999;
+        }
+        #result-panel {
+            position: absolute;
+            top: 20px;
+            left: -300px;
+            display: block;
+            margin-left: -180px;
+            z-index: 5;
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #999;
+        }
+        #map-canvas {
+            width: 1000px;
+            height: 800px;
+            margin: 20px auto;
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
@@ -29,22 +46,43 @@
             geocoder = new google.maps.Geocoder();
             var latlng = new google.maps.LatLng(37.8700,-122.2590);
             var mapOptions = {
-                zoom: 8,
+                zoom: 9,
                 center: latlng
             }
             map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
         }
         function codeAddress() {
             var address = document.querySelector('#address').value;
-
+            var keyword = 'universities';
             geocoder.geocode( { 'address': address}, function(results, status) {
                 if (status == google.maps.GeocoderStatus.OK) {
                     map.setCenter(results[0].geometry.location);
                     console.log(results[0].geometry.location);
                     var marker = new google.maps.Marker({
                         map: map,
-                        position: results[0].geometry.location
+                        position: results[0].geometry.location,
+                        icon: "/images/icons/mini-marker-green.png"
                     });
+
+                    //return marker;
+                    var jsonObject = {
+                        name: 'school',
+                        keyword: 'universities',
+                        latLng: results[0].geometry.location
+                    };
+                    console.log(jsonObject);
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/map/mapinput');
+                    xhr.setRequestHeader('accept', 'application/json');
+                    xhr.setRequestHeader('content-type', 'application/json');
+                    xhr.addEventListener('readystatechange', function () {
+                        if (xhr.readyState === 4 && xhr.status === 200) {
+                            var obj = JSON.parse(xhr.responseText);
+                            console.log(obj);
+                        }
+                    });
+                    xhr.send(JSON.stringify(jsonObject));
+
                 } else {
                     alert('Geocode broke: ' + status);
                 }
@@ -52,8 +90,39 @@
         }
 
         function browseLocations () {
+            console.log('fired browseLocations');
             var keyword = 'universities';
             var locationIn = document.querySelector('#locationsIn').value;
+            var resPanel = document.querySelector('#results');
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/map/mapinput/' + locationIn);
+            xhr.setRequestHeader('accept', 'application/json');
+            xhr.setRequestHeader('content-type', 'application/json');
+            xhr.addEventListener('readystatechange', function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    resPanel.innerHTML = '';
+                    var obj = JSON.parse(xhr.responseText);
+                    console.log(obj);
+                    for (var i= 0; i < obj.length; i++){
+
+                        var d = document.createElement('div');
+
+                        d.innerHTML = obj[i].name + '</br>' + obj[i].city + ',  ' + obj[i].state + '</br>' + obj[i].lat + ',  ' +obj[i].lng + '</br> </br>';
+                        resPanel.appendChild(d);
+                        var pos = new google.maps.LatLng(obj[i].lat,obj[i].lng);
+
+                        var marker = new google.maps.Marker({
+                            map: map,
+                            position: pos,
+                            icon: "/images/icons/mini-marker-red.png"
+                        });
+
+                    }
+                }
+            });
+            xhr.send();
+
 
         }
 
@@ -61,13 +130,16 @@
     </script>
 </head>
 <body>
-<div id="panel">
+<div id="search-panel">
     <input id="address" type="textbox" value="Berkeley, CA">
     <input type="button" value="Mark Location" onclick="codeAddress()">
 
-    <input id="locationsIn" type="textbox" value="Berkeley, CA">
+    <input id="locationsIn" type="textbox" value="94086">
     <input type="button" value="Get Universities In" onclick="browseLocations()">
-
+<div id="result-panel">
+    <h1>Search Results</h1>
+    <div id="results"></div>
+</div>
 </div>
 <div id="map-canvas"></div>
 </body>
