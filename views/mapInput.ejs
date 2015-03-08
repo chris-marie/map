@@ -105,13 +105,16 @@
                     resPanel.innerHTML = '';
                     var obj = JSON.parse(xhr.responseText);
                     console.log(obj);
-                    for (var i= 0; i < obj.length; i++){
+                    for (var i= 0; i < obj.length; i++) {
+                        var o = obj[i];
 
                         var d = document.createElement('div');
 
-                        d.innerHTML = obj[i].name + '</br>' + obj[i].city + ',  ' + obj[i].state + '</br>' + obj[i].lat + ',  ' +obj[i].lng + '</br> </br>';
+                        var htmlContent = obj[i].name + '</br>' + obj[i].city + ',  ' + obj[i].state + '</br>' + obj[i].departments + '</br> </br>';
+
+                        d.innerHTML = htmlContent;
                         resPanel.appendChild(d);
-                        var pos = new google.maps.LatLng(obj[i].lat,obj[i].lng);
+                        var pos = new google.maps.LatLng(obj[i].lat, obj[i].lng);
                         nextCenter = pos;
 
                         var marker = new google.maps.Marker({
@@ -119,7 +122,13 @@
                             position: pos,
                             icon: "/images/icons/mini-marker-red.png"
                         });
+                        var infowindow = new google.maps.InfoWindow({
+                            content: htmlContent
+                        });
+                        google.maps.event.addListener(marker, 'click', (function (m, iw) {
+                            iw.open(map, m);
 
+                        }).bind(null, marker, infowindow));
                     }
                     map.setCenter(nextCenter);
                     map.setZoom(12);

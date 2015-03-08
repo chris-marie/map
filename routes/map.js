@@ -31,6 +31,7 @@ mongoose.connect('mongodb://localhost/test', function (err) {
 var LocalModel = mongoose.model('Local', {
     name: String,
     keyword: String,
+    departments: String,
     lat: String,
     lng: String,
     city: String,
