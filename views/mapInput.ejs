@@ -14,7 +14,7 @@
         #search-panel {
             position: absolute;
             top: 5px;
-            left: calc(50% - 130px);
+            left: calc(50% - 50px);
             margin-left: -180px;
             z-index: 5;
             background-color: #fff;
@@ -51,43 +51,7 @@
             }
             map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
         }
-        function codeAddress() {
-            var address = document.querySelector('#address').value;
-            var keyword = 'universities';
-            geocoder.geocode( { 'address': address}, function(results, status) {
-                if (status == google.maps.GeocoderStatus.OK) {
-                    map.setCenter(results[0].geometry.location);
-                    console.log(results[0].geometry.location);
-                    var marker = new google.maps.Marker({
-                        map: map,
-                        position: results[0].geometry.location,
-                        icon: "/images/icons/mini-marker-green.png"
-                    });
 
-                    //return marker;
-                    var jsonObject = {
-                        name: 'school',
-                        keyword: 'universities',
-                        latLng: results[0].geometry.location
-                    };
-                    console.log(jsonObject);
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/map/mapinput');
-                    xhr.setRequestHeader('accept', 'application/json');
-                    xhr.setRequestHeader('content-type', 'application/json');
-                    xhr.addEventListener('readystatechange', function () {
-                        if (xhr.readyState === 4 && xhr.status === 200) {
-                            var obj = JSON.parse(xhr.responseText);
-                            console.log(obj);
-                        }
-                    });
-                    xhr.send(JSON.stringify(jsonObject));
-
-                } else {
-                    alert('Geocode broke: ' + status);
-                }
-            });
-        }
 
         function browseLocations () {
             console.log('fired browseLocations');
@@ -102,18 +66,14 @@
             xhr.setRequestHeader('content-type', 'application/json');
             xhr.addEventListener('readystatechange', function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
-                    resPanel.innerHTML = '';
+
                     var obj = JSON.parse(xhr.responseText);
                     console.log(obj);
                     for (var i= 0; i < obj.length; i++) {
                         var o = obj[i];
-
-                        var d = document.createElement('div');
-
                         var htmlContent = obj[i].name + '</br>' + obj[i].city + ',  ' + obj[i].state + '</br>' + obj[i].departments + '</br> </br>';
+                        listQueryResults(obj[i]);
 
-                        d.innerHTML = htmlContent;
-                        resPanel.appendChild(d);
                         var pos = new google.maps.LatLng(obj[i].lat, obj[i].lng);
                         nextCenter = pos;
 
@@ -136,7 +96,15 @@
                 }
             });
             xhr.send();
+            function listQueryResults (obj) {
+                // clear previous results
+                resPanel.innerHTML = '';
 
+                var htmlContent = obj.name + '</br>' + obj.city + ',  ' + obj.state + '</br>' + obj.departments + '</br> </br>';
+                var d = document.createElement('div');
+                d.innerHTML = htmlContent;
+                resPanel.appendChild(d);
+            }
 
         }
 
@@ -145,8 +113,6 @@
 </head>
 <body>
 <div id="search-panel">
-    <input id="address" type="textbox" value="Berkeley, CA">
-    <input type="button" value="Mark Location" onclick="codeAddress()">
 
     <input id="locationsIn" type="textbox" value="94086">
     <input type="button" value="Get Universities In" onclick="browseLocations()">
