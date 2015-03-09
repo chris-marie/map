@@ -5,39 +5,7 @@
     <meta charset="utf-8">
     <title><%= title %></title>
     <link rel="stylesheet" href="/stylesheets/base.css"/>
-    <style>
-        html, body, #map-canvas {
-            height: 100%;
-            margin: 0px;
-            padding: 0px
-        }
-        #search-panel {
-            position: absolute;
-            top: 5px;
-            left: calc(50% - 50px);
-            margin-left: -180px;
-            z-index: 5;
-            background-color: #fff;
-            padding: 10px;
-            border: 1px solid #999;
-        }
-        .result-container {
-            position: absolute;
-            top: 20px;
-            left: -300px;
-            display: block;
-            margin-left: -180px;
-            z-index: 5;
-            background-color: #fff;
-            padding: 10px;
-            border: 1px solid #999;
-        }
-        #map-canvas {
-            width: 1000px;
-            height: 800px;
-            margin: 20px auto;
-        }
-    </style>
+    <link rel="stylesheet" href="/stylesheets/mapInputStyle.css"/>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
     <script>
         var geocoder;
