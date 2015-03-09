@@ -44,7 +44,6 @@ function codeAddress() {
 }
 
 
-
 /*
 Display Query Results HTML:
 

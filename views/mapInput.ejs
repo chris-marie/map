@@ -21,7 +21,7 @@
             padding: 10px;
             border: 1px solid #999;
         }
-        #result-panel {
+        .result-container {
             position: absolute;
             top: 20px;
             left: -300px;
@@ -52,12 +52,19 @@
             map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
         }
 
+        function browseLocations (display) {
+            // display is a functionality to turn on/off the results panel
+            if(display) {
+                var resPanelContainer = makeResultsDisplay();
+                console.log(resPanelContainer);
+                var resPanel = document.querySelector('#results');
+                console.log(resPanel);
+            }
 
-        function browseLocations () {
             console.log('fired browseLocations');
             var keyword = 'universities';
             var locationIn = document.querySelector('#locationsIn').value;
-            var resPanel = document.querySelector('#results');
+
             var nextCenter;
 
             var xhr = new XMLHttpRequest();
@@ -66,13 +73,14 @@
             xhr.setRequestHeader('content-type', 'application/json');
             xhr.addEventListener('readystatechange', function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
-
+                    resPanel.innerHTML = '';
                     var obj = JSON.parse(xhr.responseText);
                     console.log(obj);
                     for (var i= 0; i < obj.length; i++) {
                         var o = obj[i];
                         var htmlContent = obj[i].name + '</br>' + obj[i].city + ',  ' + obj[i].state + '</br>' + obj[i].departments + '</br> </br>';
-                        listQueryResults(obj[i]);
+
+                        if(display) listQueryResults(obj[i]);
 
                         var pos = new google.maps.LatLng(obj[i].lat, obj[i].lng);
                         nextCenter = pos;
@@ -92,22 +100,38 @@
                     }
                     map.setCenter(nextCenter);
                     map.setZoom(12);
-
                 }
             });
             xhr.send();
             function listQueryResults (obj) {
+                console.log('listQueryResults');
                 // clear previous results
-                resPanel.innerHTML = '';
-
                 var htmlContent = obj.name + '</br>' + obj.city + ',  ' + obj.state + '</br>' + obj.departments + '</br> </br>';
+                console.log(htmlContent);
+                createElement('div', resPanel,htmlContent, 'resultListItem');
+
                 var d = document.createElement('div');
                 d.innerHTML = htmlContent;
                 resPanel.appendChild(d);
             }
 
+            function makeResultsDisplay () {
+                console.log('makeResultsDisplay');
+                var container = createElement('div',document.body,'','','result-container');
+                var h1 = createElement('h1',container,'Search Results');
+                var resList = createElement('div',container, '','results');
+                document.body.appendChild(container);
+                return container;
+            }
+            function createElement (type, parent, innerhtml, idName, className) {
+                var element = document.createElement(type);
+                if(idName) element.id = idName;
+                if(innerhtml) element.innerHTML = innerhtml;
+                if(className) element.className = className;
+                parent.appendChild(element);
+                return element;
+            }
         }
-
         google.maps.event.addDomListener(window, 'load', initialize);
     </script>
 </head>
@@ -115,11 +139,7 @@
 <div id="search-panel">
 
     <input id="locationsIn" type="textbox" value="94086">
-    <input type="button" value="Get Universities In" onclick="browseLocations()">
-<div id="result-panel">
-    <h1>Search Results</h1>
-    <div id="results"></div>
-</div>
+    <input type="button" value="Get Universities In" onclick="browseLocations(true)">
 </div>
 <div id="map-canvas"></div>
 </body>
